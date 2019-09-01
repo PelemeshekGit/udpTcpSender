@@ -15,6 +15,10 @@ INCLUDEPATH += ./Widget
 SOURCES += \
     main.cpp
 
+RESOURCES += \
+    res.qrc
+
+
 
 CONFIG *= warn_on
 QMAKE_CXXFLAGS *= -std=c++11

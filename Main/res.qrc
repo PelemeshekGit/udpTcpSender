@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/ok.xpm</file>
+        <file>icons/none.xpm</file>
+        <file>icons/error.xpm</file>
+        <file>icons/current.xpm</file>
+    </qresource>
+</RCC>
