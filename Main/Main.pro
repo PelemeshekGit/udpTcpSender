@@ -10,15 +10,20 @@ TARGET = UdpTcpSender
 include( Tcp/Tcp.pri )
 include( Udp/Udp.pri )
 include( Widget/Widget.pri )
-INCLUDEPATH += ./Widget
+include( Ethernet/Ethernet.pri )
+include( TopManager/TopManager.pri )
+
+INCLUDEPATH +=  ./Widget \
+                ./Ethernet \
+                ./Tcp \
+                ./Udp \
+                ./TopManager
 
 SOURCES += \
     main.cpp
 
 RESOURCES += \
     res.qrc
-
-
 
 CONFIG *= warn_on
 QMAKE_CXXFLAGS *= -std=c++11

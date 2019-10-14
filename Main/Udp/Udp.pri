@@ -1,7 +1,5 @@
 HEADERS += \    
-    $$PWD/udpsend.h \
-    $$PWD/udpreceive.h
+    $$PWD/udp.h
 
 SOURCES += \    
-    $$PWD/udpsend.cpp \
-    $$PWD/udpreceive.cpp
+    $$PWD/udp.cpp

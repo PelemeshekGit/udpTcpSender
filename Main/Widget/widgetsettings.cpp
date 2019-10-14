@@ -2,7 +2,7 @@
 #include "ui_widgetsettings.h"
 #include <QRegExp>
 #include "indicators.h"
-
+#include <QDebug>
 using namespace Widget;
 
 WidgetSettings::WidgetSettings(QWidget* parent) :
@@ -31,7 +31,12 @@ WidgetSettings::~WidgetSettings() {
     delete ui;
 }
 //------------------------------------------------------------------------------
+void WidgetSettings::updateSettings(){
+    slotChangeSetting();
+}
+//------------------------------------------------------------------------------
 void WidgetSettings::slotSettingsIsAccept(bool result) {
+    qDebug() << "slotSettingsIsAccept" << result;
     if (result) {
         ui->imgResultConnect->setPixmap( *INDICATOR.getOk() );
     } else {

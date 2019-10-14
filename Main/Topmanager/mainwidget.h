@@ -33,6 +33,7 @@ private:
 
 private slots:
     void slotSendData();
+    void slotReadData(int id);
 
     void slotCreateConnectTcpClient(QString ip, int portManage);
     void slotCreateConnectTcpServer(QString ip, int portManage);

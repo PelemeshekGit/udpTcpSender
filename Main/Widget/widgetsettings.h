@@ -17,13 +17,16 @@ public:
     explicit WidgetSettings(QWidget* parent = nullptr);
     ~WidgetSettings();
 
+    /// Обновить состояние настроек и выслать сигнал текущей настройки
+    void updateSettings();
+
 signals:
     void setUdp(QString ip, int portSend, int portReceive);
     void setTcpClient(QString ip, int port);
     void setTcpServer(QString ip, int port);
 
 public slots:
-    /// TODO Сообщить о результате примененных настроек (true - применены)
+    /// Сообщить о результате примененных настроек (true - применены)
     void slotSettingsIsAccept(bool result);
 
 private:
