@@ -31,12 +31,11 @@ WidgetSettings::~WidgetSettings() {
     delete ui;
 }
 //------------------------------------------------------------------------------
-void WidgetSettings::updateSettings(){
+void WidgetSettings::updateSettings() {
     slotChangeSetting();
 }
 //------------------------------------------------------------------------------
 void WidgetSettings::slotSettingsIsAccept(bool result) {
-    qDebug() << "slotSettingsIsAccept" << result;
     if (result) {
         ui->imgResultConnect->setPixmap( *INDICATOR.getOk() );
     } else {
@@ -54,6 +53,8 @@ void WidgetSettings::slotChangeSetting() {
 }
 //------------------------------------------------------------------------------
 void WidgetSettings::slotUpdateSettings() {
+    ui->imgResultConnect->setPixmap( *INDICATOR.getCurrent() );
+
     if (ui->rbSettingsUdp->isChecked()) {
         emit setUdp(ui->edIp->text(), ui->edPortSend->value(), ui->edPortReceive->value());
     } else if (ui->rbSettingsTcp->isChecked()) {

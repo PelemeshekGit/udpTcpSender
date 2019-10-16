@@ -33,8 +33,8 @@ void WidgetLog::writeLog(QByteArray& dg) {
         }
 
         ui->textLog->insertPlainText( resultStr );
-    } else {    // записываем json
-        ui->textLog->insertPlainText( dg.data() );
+    } else if (ui->rbLogJson->isChecked()) {   // записываем json
+        ui->textLog->insertPlainText( dg.data() + QString("\n") );
     }
 
     writeSeparatorToLog();
@@ -53,7 +53,7 @@ void WidgetLog::slotClearLog() {
 }
 //------------------------------------------------------------------------------
 void WidgetLog::writeSeparatorToLog() {
-    ui->textLog->insertPlainText("---------\n");
+    ui->textLog->insertPlainText("\n");
 }
 //------------------------------------------------------------------------------
 

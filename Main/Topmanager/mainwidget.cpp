@@ -2,7 +2,8 @@
 #include "ui_mainwidget.h"
 
 #include "udp.h"
-#include "tcp.h"
+#include "tcpclient.h"
+#include "tcpserver.h"
 
 MainWidget::MainWidget(QWidget* parent) :
     QWidget(parent),
@@ -35,9 +36,6 @@ MainWidget::MainWidget(QWidget* parent) :
     connect(mWidgetDg, SIGNAL(sendData()), SLOT(slotSendData()));
 
 
-
-    // TODO результат соединения
-
     // задать настройки соединения при запуске
     mWidgetSettings->updateSettings();
 }
@@ -47,39 +45,70 @@ MainWidget::~MainWidget() {
 }
 //------------------------------------------------------------------------------
 void MainWidget::slotSendData() {
-    if(mEthernet.isNull()){
+    if (mEthernet.isNull()) {
         return;
     }
+
     QByteArray dg = mWidgetDg->getDg();
     mWidgetLog->writeInfo(QString("----send dg----"));
     mWidgetLog->writeLog(dg);
 
     // отправка датаграммы
-    mEthernet.data()->sendDataFast(dg);
+    bool result = mEthernet.data()->sendData(dg);
+
+    // результат отправки данных
+    if (result) {
+        mWidgetDg->setInicatorStatus(STATUS_INDICATOR::Ok);
+    } else {
+        mWidgetDg->setInicatorStatus(STATUS_INDICATOR::Error);
+    }
 }
 //------------------------------------------------------------------------------
-void MainWidget::slotReadData(int id){
+void MainWidget::slotReadData(int id) {
     mWidgetLog->writeInfo(QString("----responce dg----"));
     QByteArray dg = mEthernet.data()->getData(id);
     mWidgetLog->writeLog( dg );
 }
 //------------------------------------------------------------------------------
 void MainWidget::slotCreateConnectTcpClient(QString ip, int portManage) {
-//    mEthernet.reset( new Tcp());
-    // TODO
+    createConnect(ethernet::TypeDerivedClass::TcpClient, ip, portManage);
 }
 //------------------------------------------------------------------------------
 void MainWidget::slotCreateConnectTcpServer(QString ip, int portManage) {
-    // TODO
+    createConnect(ethernet::TypeDerivedClass::TcpServer, ip, portManage);
 }
 //------------------------------------------------------------------------------
 void MainWidget::slotCreateConnectUdp(QString ip, int portSend, int portReceive) {
-    mEthernet.reset( new Udp() );
-    // пришли данные
-    connect(mEthernet.data(), SIGNAL(signalReadData(int)), SLOT(slotReadData(int)));
-    connect(mEthernet.data(), SIGNAL(signalConnectStatus(bool)),
-            mWidgetSettings, SLOT(slotSettingsIsAccept(bool)));
-    mEthernet.data()->setSender(ip, portSend);
-    mEthernet.data()->setReceive(portReceive);
+    createConnect(ethernet::TypeDerivedClass::Udp, ip, portSend, portReceive);
 }
 //------------------------------------------------------------------------------
+void MainWidget::createConnect(const ethernet::TypeDerivedClass& typeConnect,
+                               QString ip, int portManage, int portReceive) {
+    // если объект уже создан, то просто обновить настройки
+    bool fCreateSocket = mEthernet.isNull();
+
+    if (!fCreateSocket) {   // сокет создан, проверяем кому он принадлежит
+        fCreateSocket = (mEthernet.data()->getTypeClass() != typeConnect);
+    }
+
+    if (fCreateSocket) {
+        if (typeConnect == ethernet::TypeDerivedClass::Udp) {
+            mEthernet.reset( new ethernet::Udp() );
+        } else if (typeConnect == ethernet::TypeDerivedClass::TcpClient) {
+            mEthernet.reset( new ethernet::TcpClient() );
+        } else if (typeConnect == ethernet::TypeDerivedClass::TcpServer) {
+            mEthernet.reset( new ethernet::TcpServer() );
+        }
+
+        // пришли данные
+        connect(mEthernet.data(), SIGNAL(signalReadData(int)), SLOT(slotReadData(int)));
+        // результат соединения
+        connect(mEthernet.data(), SIGNAL(signalConnectStatus(bool)),
+                mWidgetSettings, SLOT(slotSettingsIsAccept(bool)));
+        connect(mEthernet.data(), SIGNAL(signalErrorMsg(QString)),
+                mWidgetLog, SLOT(slotWriteInfo(QString)));
+    }
+
+    // настройки соединения
+    mEthernet.data()->setSettings(QHostAddress(ip), portManage, portReceive);
+}

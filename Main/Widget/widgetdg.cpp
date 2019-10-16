@@ -128,7 +128,7 @@ void WidgetDg::slotUpdateQuantitySays() {
         }
     } else {
         // иначе добавляем недостающие строки
-        for ( int row = (mTablQuantitySays); row < newSize; ++row ) {
+        for ( int row = mTablQuantitySays; row < newSize; ++row ) {
             createSay(row);
         }
     }
@@ -146,22 +146,28 @@ void WidgetDg::slotSendData() {
         }
     } else if (ui->rbSendJson->isChecked()) { // json
         mRealDg.append( ui->textEditJson->toPlainText() );
-        // проверка корректности
-        QJsonDocument jsonDoc = QJsonDocument::fromJson( mRealDg );
 
-        if ( !jsonDoc.isObject() ) { // некорректный json код
-            emit msg(QString("Uncorrect json-code"));
-            setInicatorStatus(STATUS_INDICATOR::Error);
-            return;
+        // проверка корректности
+        if (!mRealDg.isEmpty()) {
+            QJsonDocument jsonDoc = QJsonDocument::fromJson( mRealDg );
+
+            if ( !jsonDoc.isObject() ) { // некорректный json код
+                emit msg(QString("Uncorrect json-code"));
+                setInicatorStatus(STATUS_INDICATOR::Error);
+                return;
+            }
         }
     } else if (ui->rbSendString->isChecked()) { // просто текст
         mRealDg.append( ui->textEditString->toPlainText() );
     }
 
     if (mRealDg.isEmpty()) { // данные не должны быть пустыми
+        emit msg(QString("data is empty"));
+        setInicatorStatus(STATUS_INDICATOR::Error);
         return;
     }
 
+    setInicatorStatus(STATUS_INDICATOR::Current);
     emit sendData();
 }
 //------------------------------------------------------------------------------
@@ -172,10 +178,6 @@ void WidgetDg::splitWordOnBytes(ushort word, QByteArray& byteArray) {
 //------------------------------------------------------------------------------
 QByteArray WidgetDg::getDg() const {
     return mRealDg;
-}
-//------------------------------------------------------------------------------
-void WidgetDg::slotSetStatusSendingDg(STATUS_INDICATOR status) {
-    setInicatorStatus(status);
 }
 //------------------------------------------------------------------------------
 void WidgetDg::setInicatorStatus(STATUS_INDICATOR status) {

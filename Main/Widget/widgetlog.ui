@@ -84,7 +84,7 @@
          <item>
           <widget class="QRadioButton" name="rbLogJson">
            <property name="text">
-            <string>json</string>
+            <string>json/текст</string>
            </property>
           </widget>
          </item>

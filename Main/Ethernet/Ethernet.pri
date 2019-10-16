@@ -1,5 +1,6 @@
 HEADERS += \
-    $$PWD/ethernet.h
+    $$PWD/ethernet.h \
+    $$PWD/typederivedclass.h
 
 #SOURCES +=
 

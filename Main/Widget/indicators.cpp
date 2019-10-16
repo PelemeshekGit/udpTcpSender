@@ -3,10 +3,10 @@
 namespace Widget {
 
 Indicators::Indicators() {
-    mPicOk.save("://icons/ok.xpm");
-    mPicError.save("://icons/error.xpm");
-    mPicCurrent.save("://icons/current.xpm");
-    mPicNone.save("://icons/none.xpm");
+    mPicOk.load("://icons/ok.xpm");
+    mPicError.load("://icons/error.xpm");
+    mPicCurrent.load("://icons/current.xpm");
+    mPicNone.load("://icons/none.xpm");
 }
 //------------------------------------------------------------------------------
 Indicators::~Indicators() {

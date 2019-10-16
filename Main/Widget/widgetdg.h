@@ -28,9 +28,8 @@ public:
     /// Получить сформированную датаграмму
     QByteArray getDg() const;
 
-public slots:
-    /// Вывести статус отправляемой датаграммы
-    void slotSetStatusSendingDg(STATUS_INDICATOR status);
+    /// Установить значение индикатора отправки данных
+    void setInicatorStatus(STATUS_INDICATOR status);
 
 signals:
     /// Датаграмма сформирована, отправить её методом getDg()
@@ -75,9 +74,6 @@ private:
         @param size - Значение размера таблицы
     */
     void setResizeContents(int size);
-
-    /// Установить значение индикатора отправки данных
-    void setInicatorStatus(STATUS_INDICATOR status);
 
     //------data------//
     /// Окно для списка команд

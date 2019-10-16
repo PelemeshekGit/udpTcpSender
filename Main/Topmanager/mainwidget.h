@@ -29,7 +29,10 @@ private:
     WidgetLog* mWidgetLog;
     WidgetSettings* mWidgetSettings;
 
-    QScopedPointer<Ethernet> mEthernet;
+    QScopedPointer<ethernet::Ethernet> mEthernet;
+
+    void createConnect(const ethernet::TypeDerivedClass& typeConnect, QString ip,
+                       int portManage, int portReceive = ethernet::PORT_UNASSUGNED);
 
 private slots:
     void slotSendData();

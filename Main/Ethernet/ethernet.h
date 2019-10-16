@@ -5,6 +5,11 @@
 #include <QString>
 #include <QByteArray>
 #include <QtNetwork/QAbstractSocket>
+#include "typederivedclass.h"
+
+namespace ethernet {
+
+static const int PORT_UNASSUGNED = -1;
 
 class Ethernet : public QObject {
     Q_OBJECT
@@ -13,11 +18,20 @@ public:
     virtual ~Ethernet();
 
     /**
-     * @brief Настройка отправщика данных
-     * @param ip - адрес
-     * @param portSend - порт отправки
+     * @brief Настройка отправщика и приемника данных
+     * @param ip - адрес отправки (UDP) или Сервера (TCP)
+     * @param portSend - порт отправки (UDP) или управления (TCP)
+     * @param portReceive - порт приема данных (UDP), для TCP не используется
      */
-    virtual void setSender(const QString& ip, int portSend) = 0;
+    virtual void setSettings(const QHostAddress& ipSender, int portSend,
+                             int portReceive = PORT_UNASSUGNED) = 0;
+
+    /**
+     * @brief Настройка приемника данных
+     * @param portManage - порт приема данных (UDP) или управления (TCP)
+     * @details по умолчанию устанавливается ip-адрес QHostAddress::Any
+     */
+    virtual void setSettings(int portManage) = 0;
 
     /**
      * @brief Отправка данных с проверкой отправлены ли данные
@@ -29,29 +43,8 @@ public:
     /**
      * @brief Отправка данных без проверки. Быстрее чем sendData()
      * @param data - данные
-     * @return - результат отправки (true - отправлено, false - не отправлено)
      */
     virtual void sendDataFast(const QByteArray& data) = 0;
-
-    /**
-     * @brief Перегруженный метод. Настройка приемника данных
-     * @param portReceive - порт приема
-     * @return - удалось ли создать приемник данных (true - всё ок)
-     */
-    virtual bool setReceive(int portReceive) = 0;
-    /**
-     * @brief Перегруженный метод. Настройка приемника данных
-     * @param ip - адрес
-     * @param portReceive - порт приема
-     * @return - удалось ли создать приемник данных (true - всё ок)
-     */
-    virtual bool setReceive(const QString& ip, int portReceive) = 0;
-
-    /**
-     * @brief Статус создания соединения (true - соединения создано успешно,
-     * false - соединения не создано)
-     */
-    virtual bool isConnected() = 0;
 
     /**
      * @brief Получить принятые данные
@@ -59,12 +52,29 @@ public:
      */
     virtual QByteArray getData(qint64 id) = 0;
 
+    /**
+     * @brief Статус создания соединения (true - соединения создано успешно,
+     * false - соединения не создано)
+     */
+    virtual bool isConnected() const = 0;
+
+    /// возвращает тип производного класса
+    TypeDerivedClass getTypeClass() const;
+    void setTypeClass(const TypeDerivedClass& type);
+
 signals:
     /// Пришли данные и готовы для чтения
     void signalReadData(int id);
 
-    /// Статус соединения
+    /// Статус соединения как у isConnected()
     void signalConnectStatus(bool);
+
+    /// Сообщение с ошибкой
+    void signalErrorMsg(QString);
+
+protected:
+    TypeDerivedClass mTypeClass = TypeDerivedClass::Undefined;
 };
 
+}
 #endif // ETHERNET_H
