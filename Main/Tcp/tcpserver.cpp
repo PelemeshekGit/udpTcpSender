@@ -132,7 +132,7 @@ void TcpServer::slotReadClient() {
     QTcpSocket* clientSocket = (QTcpSocket*)sender();
 
     // TODO запись уникального ключа
-    auto nowDescr = clientSocket->socketDescriptor();
+    //auto nowDescr = clientSocket->socketDescriptor();
 
     mCounterReceiveData++;
     mReadedData.insert(mCounterReceiveData, clientSocket->readAll());
