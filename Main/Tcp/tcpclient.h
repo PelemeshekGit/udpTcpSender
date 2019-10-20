@@ -36,6 +36,9 @@ public:
 
     qintptr getDescriptor() const;
 
+    /// Задать ожидение для соединения. Задается перед вызовом setSettings, по умолчанию 2000мс
+    void setWaitForConnected(int msecs);
+
 //--------------------------------private slots---------------------------------
 private slots:
     /// Ошибка соединения
@@ -62,6 +65,9 @@ private:
     bool mIsConnected;
 
     QHash<qint64, QByteArray> mReadedData;
+
+
+    int mWaitForConnected;
 
 };
 

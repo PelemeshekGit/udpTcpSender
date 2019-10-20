@@ -19,7 +19,7 @@ public:
     ~WidgetLog();
 
     /// Добавить датаграмму в лог
-    void writeLog(QByteArray& dg);
+    void writeLog(const QByteArray& dg);
 
     /// Добавить описание в лог
     void writeInfo(const QString& text);
@@ -32,6 +32,9 @@ private:
 
     /// Разделитель для лога, чтобы отделять разные датаграммы
     void writeSeparatorToLog();
+
+    /// Запись текущего времени в лог
+    void writeCurrentTimeToLog();
 
 private slots:
     void slotClearLog();

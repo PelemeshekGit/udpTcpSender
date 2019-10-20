@@ -75,7 +75,7 @@ QLineEdit* WidgetDg::createNewEdit( int row) {
 }
 //------------------------------------------------------------------------------
 void WidgetDg::slotCheckValueEdit() {
-    QLineEdit* bufEd = (QLineEdit*)sender();
+    QLineEdit* bufEd = dynamic_cast<QLineEdit*>(sender());
     bool isCorrectData;
     bufEd->text().toUShort(&isCorrectData, Consts::BASEDATAHEX);
 

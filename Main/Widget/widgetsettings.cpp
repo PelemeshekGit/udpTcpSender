@@ -25,6 +25,8 @@ WidgetSettings::WidgetSettings(QWidget* parent) :
     connect(ui->edPortTcp, SIGNAL(editingFinished()), SLOT(slotUpdateSettings()));
     connect(ui->edPortSend, SIGNAL(editingFinished()), SLOT(slotUpdateSettings()));
     connect(ui->edPortReceive, SIGNAL(editingFinished()), SLOT(slotUpdateSettings()));
+
+    connect(ui->btnReconnect, SIGNAL(clicked(bool)), SLOT(slotChangeSetting()));
 }
 //------------------------------------------------------------------------------
 WidgetSettings::~WidgetSettings() {

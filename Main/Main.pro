@@ -12,12 +12,14 @@ include( Udp/Udp.pri )
 include( Widget/Widget.pri )
 include( Ethernet/Ethernet.pri )
 include( TopManager/TopManager.pri )
+include( Version/Version.pri )
 
 INCLUDEPATH +=  ./Widget \
                 ./Ethernet \
                 ./Tcp \
                 ./Udp \
-                ./TopManager
+                ./TopManager \
+                ./Version
 
 SOURCES += \
     main.cpp
