@@ -42,6 +42,7 @@ private slots:
     void slotCreateConnectTcpServer(QString ip, int portManage);
     void slotCreateConnectUdp(QString, int, int portReceive);
 
+    void slotAdditionalSetings(bool fEcho);
 };
 
 #endif // MAINWIDGET_H

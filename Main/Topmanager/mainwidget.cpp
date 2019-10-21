@@ -41,6 +41,10 @@ MainWidget::MainWidget(QWidget* parent) :
     // отправка данных
     connect(mWidgetDg, SIGNAL(sendData()), SLOT(slotSendData()));
 
+    // дополнительные настройки
+    connect(mWidgetSettings, SIGNAL(signalAdditionalSetings(bool)),
+            SLOT(slotAdditionalSetings(bool)));
+
 
     // задать настройки соединения при запуске
     mWidgetSettings->updateSettings();
@@ -88,6 +92,12 @@ void MainWidget::slotCreateConnectUdp(QString ip, int portSend, int portReceive)
     createConnect(ethernet::TypeDerivedClass::Udp, ip, portSend, portReceive);
 }
 //------------------------------------------------------------------------------
+void MainWidget::slotAdditionalSetings(bool fEcho) {
+    if (!mEthernet.isNull()) {
+        mEthernet.data()->setEchoServer(fEcho);
+    }
+}
+//------------------------------------------------------------------------------
 void MainWidget::createConnect(const ethernet::TypeDerivedClass& typeConnect,
                                QString ip, int portManage, int portReceive) {
     // если объект уже создан, то просто обновить настройки
@@ -113,8 +123,11 @@ void MainWidget::createConnect(const ethernet::TypeDerivedClass& typeConnect,
                 mWidgetSettings, SLOT(slotSettingsIsAccept(bool)));
         connect(mEthernet.data(), SIGNAL(signalErrorMsg(QString)),
                 mWidgetLog, SLOT(slotWriteInfo(QString)));
+        connect(mEthernet.data(), SIGNAL(signalMsg(QString)),
+                mWidgetLog, SLOT(slotWriteInfo(QString)));
     }
 
     // настройки соединения
     mEthernet.data()->setSettings(QHostAddress(ip), portManage, portReceive);
 }
+//------------------------------------------------------------------------------

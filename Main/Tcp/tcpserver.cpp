@@ -8,20 +8,20 @@ namespace ethernet {
 TcpServer::TcpServer(QObject* parent) :
     Ethernet(parent),
     mCounterReceiveData(0),
-    mIsConnected(false),
-    mEchoServer(false) {
+    mIsConnected(false) {
 
     setTypeClass(TypeDerivedClass::TcpServer);
 
     mTcp.reset( new QTcpServer(parent) );
 
-    connect( mTcp.data(), SIGNAL(newConnection()),
-             SLOT(slotNewConnection()) );
+    connect( mTcp.data(), SIGNAL(newConnection()), SLOT(slotNewConnection()) );
 }
 //------------------------------------------------------------------------------
 TcpServer::~TcpServer() {
     for (const auto& i : mMyClients.keys()) {
         if (mMyClients[i]->isOpen()) {
+            mMyClients[i]->disconnect(SIGNAL(disconnected()));
+            mMyClients[i]->disconnect(SIGNAL(readyRead()));
             mMyClients[i]->close();
         }
 
@@ -57,6 +57,10 @@ bool TcpServer::sendData(const QByteArray& data) {
 }
 //------------------------------------------------------------------------------
 bool TcpServer::sendData(const QByteArray& data, const qintptr& descriptor) {
+    if (!isConnected()) {
+        return false;
+    }
+
     bool fResult = false;
 
     // если не указан дескриптор, значит отправляем всем
@@ -89,6 +93,10 @@ void TcpServer::sendDataFast(const QByteArray& data) {
 }
 //------------------------------------------------------------------------------
 void TcpServer::sendDataFast(const QByteArray& data, const qintptr& descriptor) {
+    if (!isConnected()) {
+        return;
+    }
+
     // если не указан дескриптор, значит отправляем всем
     if (descriptor == -1) {
         for (const auto& descr : mMyClients.keys()) {
@@ -115,10 +123,6 @@ bool TcpServer::isConnected() const {
     return mIsConnected;
 }
 //------------------------------------------------------------------------------
-void TcpServer::setEchoServer(bool on) {
-    mEchoServer = on;
-}
-//------------------------------------------------------------------------------
 void TcpServer::slotNewConnection() {
     while (true) {
         QTcpSocket* clientSock = mTcp.data()->nextPendingConnection();
@@ -128,7 +132,8 @@ void TcpServer::slotNewConnection() {
         }
 
         qintptr idusersocs = clientSock->socketDescriptor();
-        mMyClients.insert(idusersocs,  clientSock);
+
+        mMyClients.insert(idusersocs, clientSock);
         connect( mMyClients[idusersocs], SIGNAL(disconnected()), SLOT(slotConnectionLost()) );
         connect( mMyClients[idusersocs], SIGNAL(readyRead()), SLOT(slotReadClient()));
         emit signalClientConnected( idusersocs );
@@ -143,7 +148,8 @@ void TcpServer::slotReadClient() {
     mReadedData.insert(mCounterReceiveData, clientSocket->readAll());
 
     // режим эхо-сервера
-    if (mEchoServer) {
+    if (getEchoServer()) {
+        emit signalMsg(QString("echo dg"));
         sendDataFast(mReadedData[mCounterReceiveData], clientSocket->socketDescriptor());
     }
 
@@ -153,16 +159,19 @@ void TcpServer::slotReadClient() {
 void TcpServer::slotConnectionLost() {
     // Получение объекта, который вызвал данный слот
     QTcpSocket* clientSocket = dynamic_cast<QTcpSocket*>(sender());
-    // нахождение уникального ключа
-    qintptr idusersocs = clientSocket->socketDescriptor();
 
     clientSocket->close();
     clientSocket->deleteLater();
 
     // Удалим объект сокета из карты сети
-    if (mMyClients.contains(idusersocs)) {
-        mMyClients.remove(idusersocs);
-        emit signalClientDisconnected( idusersocs );
+    for (auto& obj : mMyClients.values()) {
+        if (obj == clientSocket) {
+            // нахождение уникального ключа (ищем так, потому что дескриптор уже имеет значение -1)
+            qintptr idusersocs = mMyClients.key(obj);
+            mMyClients.remove(idusersocs);
+            emit signalClientDisconnected( idusersocs );
+            break;
+        }
     }
 }
 //------------------------------------------------------------------------------

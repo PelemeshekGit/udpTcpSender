@@ -37,7 +37,7 @@ void WidgetLog::writeLog(const QByteArray& dg) {
         }
 
         ui->textLog->insertPlainText( std::move(resultStr) );
-    } else if (ui->rbLogJson->isChecked()) {   // записываем json
+    } else if (ui->rbLogJson->isChecked()) {   // записываем json/текст
         ui->textLog->insertPlainText( dg.data() + QString("\n") );
     }
 

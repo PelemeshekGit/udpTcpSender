@@ -50,13 +50,6 @@ public:
 
     bool isConnected() const final override;
 
-    /**
-     * @brief Включение режима ответа клиентом того что они отправляют
-     * @param on - true - включить переотправку, false - отключить
-     * @details по умолчанию false
-     */
-    void setEchoServer(bool on);
-
 //-------------------------------------signals----------------------------------
 signals:
     /// Присоединился новый клиент
@@ -94,8 +87,6 @@ private:
     bool mIsConnected;
 
     QHash<qint64, QByteArray> mReadedData;
-
-    bool mEchoServer;
 
 };
 

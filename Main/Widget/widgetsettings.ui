@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>212</width>
-    <height>299</height>
+    <height>334</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
     <number>3</number>
    </property>
    <property name="bottomMargin">
-    <number>3</number>
+    <number>6</number>
    </property>
    <item>
     <widget class="QWidget" name="widget_6" native="true">
@@ -452,6 +452,31 @@
      <property name="text">
       <string>Реконнект</string>
      </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbAdditionalSettings">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>Дополнительные настройки</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QCheckBox" name="cbEchoServer">
+        <property name="whatsThis">
+         <string>Переотправлять те данные, которые пришли</string>
+        </property>
+        <property name="text">
+         <string>Режим эхо-ответа</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>

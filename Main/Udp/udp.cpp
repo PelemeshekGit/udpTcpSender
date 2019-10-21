@@ -86,6 +86,13 @@ void Udp::slotReadData() {
 
     mCounterReceiveData++;
     mReadedData.insert(mCounterReceiveData, std::move(readData) );
+
+    // режим эхо-сервера
+    if (getEchoServer()) {
+        emit signalMsg(QString("echo dg"));
+        sendDataFast(mReadedData[mCounterReceiveData]);
+    }
+
     emit signalReadData(mCounterReceiveData);
 }
 //------------------------------------------------------------------------------

@@ -25,6 +25,12 @@ signals:
     void setTcpClient(QString ip, int port);
     void setTcpServer(QString ip, int port);
 
+    /**
+     * @brief Дополнительные настройки
+     * @param fEcho - вкл/выкл эхо-сервер
+     */
+    void signalAdditionalSetings(bool fEcho);
+
 public slots:
     /// Сообщить о результате примененных настроек (true - применены)
     void slotSettingsIsAccept(bool result);
@@ -36,6 +42,8 @@ private slots:
     void slotUpdateSettings();
 
     void slotChangeSetting();
+
+    void slotAdditionalSetting();
 };
 
 #endif // WIDGETSETTINGS_H

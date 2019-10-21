@@ -39,6 +39,10 @@ void TcpClient::setSettings(int portManage) {
 }
 //------------------------------------------------------------------------------
 bool TcpClient::sendData(const QByteArray& data) {
+    if (!isConnected()) {
+        return false;
+    }
+
     int sizeSendData = static_cast<int>( mTcp.data()->write( data ) );
 
     if ( sizeSendData != data.size() ) {
@@ -49,6 +53,10 @@ bool TcpClient::sendData(const QByteArray& data) {
 }
 //------------------------------------------------------------------------------
 void TcpClient::sendDataFast(const QByteArray& data) {
+    if (!isConnected()) {
+        return;
+    }
+
     mTcp.data()->write( data );
 }
 //------------------------------------------------------------------------------
@@ -129,6 +137,13 @@ void TcpClient::slotReadyRead() {
 
     mCounterReceiveData++;
     mReadedData.insert(mCounterReceiveData, readData);
+
+    // режим эхо-сервера
+    if (getEchoServer()) {
+        emit signalMsg(QString("echo dg"));
+        sendDataFast(mReadedData[mCounterReceiveData]);
+    }
+
     emit signalReadData(mCounterReceiveData);
 }
 //------------------------------------------------------------------------------
