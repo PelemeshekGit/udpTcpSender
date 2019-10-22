@@ -2,7 +2,7 @@
 #include "ui_widgetsettings.h"
 #include <QRegExp>
 #include "indicators.h"
-#include <QDebug>
+
 using namespace Widget;
 
 WidgetSettings::WidgetSettings(QWidget* parent) :
@@ -25,6 +25,10 @@ WidgetSettings::WidgetSettings(QWidget* parent) :
     connect(ui->edPortTcp, SIGNAL(editingFinished()), SLOT(slotUpdateSettings()));
     connect(ui->edPortSend, SIGNAL(editingFinished()), SLOT(slotUpdateSettings()));
     connect(ui->edPortReceive, SIGNAL(editingFinished()), SLOT(slotUpdateSettings()));
+
+    connect(ui->btnReconnect, SIGNAL(clicked(bool)), SLOT(slotChangeSetting()));
+
+    connect(ui->cbEchoServer, SIGNAL(toggled(bool)), SLOT(slotAdditionalSetting()));
 }
 //------------------------------------------------------------------------------
 WidgetSettings::~WidgetSettings() {
@@ -50,6 +54,11 @@ void WidgetSettings::slotChangeSetting() {
     ui->framePortUdpReceive->setVisible(ui->rbSettingsUdp->isChecked());
 
     slotUpdateSettings();
+    slotAdditionalSetting();
+}
+//------------------------------------------------------------------------------
+void WidgetSettings::slotAdditionalSetting() {
+    emit signalAdditionalSetings(ui->cbEchoServer->isChecked());
 }
 //------------------------------------------------------------------------------
 void WidgetSettings::slotUpdateSettings() {

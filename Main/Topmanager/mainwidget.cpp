@@ -4,11 +4,17 @@
 #include "udp.h"
 #include "tcpclient.h"
 #include "tcpserver.h"
+#include "version.h"
 
 MainWidget::MainWidget(QWidget* parent) :
     QWidget(parent),
     ui(new Ui::MainWidget) {
     ui->setupUi(this);
+
+    setWindowTitle(QString("%1 v.%2.%3")
+                   .arg(version::NAME_PROJECT)
+                   .arg(version::VER_MAJOR)
+                   .arg(version::VER_MINOR) );
 
     mWidgetLog = new WidgetLog;
     ui->layoutLog->addWidget(mWidgetLog);
@@ -35,6 +41,10 @@ MainWidget::MainWidget(QWidget* parent) :
     // отправка данных
     connect(mWidgetDg, SIGNAL(sendData()), SLOT(slotSendData()));
 
+    // дополнительные настройки
+    connect(mWidgetSettings, SIGNAL(signalAdditionalSetings(bool)),
+            SLOT(slotAdditionalSetings(bool)));
+
 
     // задать настройки соединения при запуске
     mWidgetSettings->updateSettings();
@@ -54,7 +64,7 @@ void MainWidget::slotSendData() {
     mWidgetLog->writeLog(dg);
 
     // отправка датаграммы
-    bool result = mEthernet.data()->sendData(dg);
+    bool result = mEthernet.data()->sendData( std::move(dg) );
 
     // результат отправки данных
     if (result) {
@@ -67,7 +77,7 @@ void MainWidget::slotSendData() {
 void MainWidget::slotReadData(int id) {
     mWidgetLog->writeInfo(QString("----responce dg----"));
     QByteArray dg = mEthernet.data()->getData(id);
-    mWidgetLog->writeLog( dg );
+    mWidgetLog->writeLog( std::move(dg) );
 }
 //------------------------------------------------------------------------------
 void MainWidget::slotCreateConnectTcpClient(QString ip, int portManage) {
@@ -80,6 +90,12 @@ void MainWidget::slotCreateConnectTcpServer(QString ip, int portManage) {
 //------------------------------------------------------------------------------
 void MainWidget::slotCreateConnectUdp(QString ip, int portSend, int portReceive) {
     createConnect(ethernet::TypeDerivedClass::Udp, ip, portSend, portReceive);
+}
+//------------------------------------------------------------------------------
+void MainWidget::slotAdditionalSetings(bool fEcho) {
+    if (!mEthernet.isNull()) {
+        mEthernet.data()->setEchoServer(fEcho);
+    }
 }
 //------------------------------------------------------------------------------
 void MainWidget::createConnect(const ethernet::TypeDerivedClass& typeConnect,
@@ -107,8 +123,11 @@ void MainWidget::createConnect(const ethernet::TypeDerivedClass& typeConnect,
                 mWidgetSettings, SLOT(slotSettingsIsAccept(bool)));
         connect(mEthernet.data(), SIGNAL(signalErrorMsg(QString)),
                 mWidgetLog, SLOT(slotWriteInfo(QString)));
+        connect(mEthernet.data(), SIGNAL(signalMsg(QString)),
+                mWidgetLog, SLOT(slotWriteInfo(QString)));
     }
 
     // настройки соединения
     mEthernet.data()->setSettings(QHostAddress(ip), portManage, portReceive);
 }
+//------------------------------------------------------------------------------

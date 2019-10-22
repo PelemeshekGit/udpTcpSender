@@ -6,7 +6,8 @@ namespace ethernet {
 TcpClient::TcpClient(QObject* parent) :
     Ethernet(parent),
     mCounterReceiveData(0),
-    mIsConnected(false) {
+    mIsConnected(false),
+    mWaitForConnected(2000) {
 
     setTypeClass(TypeDerivedClass::TcpClient);
 
@@ -28,7 +29,7 @@ void TcpClient::setSettings(const QHostAddress& ipSender, int portSend, int port
     resetConnect();
     // если не произошло соединения в течении двух секунд,
     // то не пытаться ждать дольше
-    mTcp.data()->waitForConnected(2000);
+    mTcp.data()->waitForConnected(mWaitForConnected);
 
     mTcp.data()->connectToHost( ipSender, portSend );
 }
@@ -38,7 +39,11 @@ void TcpClient::setSettings(int portManage) {
 }
 //------------------------------------------------------------------------------
 bool TcpClient::sendData(const QByteArray& data) {
-    qint32 sizeSendData = mTcp.data()->write( data );
+    if (!isConnected()) {
+        return false;
+    }
+
+    int sizeSendData = static_cast<int>( mTcp.data()->write( data ) );
 
     if ( sizeSendData != data.size() ) {
         return false;
@@ -48,6 +53,10 @@ bool TcpClient::sendData(const QByteArray& data) {
 }
 //------------------------------------------------------------------------------
 void TcpClient::sendDataFast(const QByteArray& data) {
+    if (!isConnected()) {
+        return;
+    }
+
     mTcp.data()->write( data );
 }
 //------------------------------------------------------------------------------
@@ -69,6 +78,10 @@ qintptr TcpClient::getDescriptor() const {
     } else {
         return qintptr();
     }
+}
+//------------------------------------------------------------------------------
+void TcpClient::setWaitForConnected(int msecs) {
+    mWaitForConnected = msecs;
 }
 //------------------------------------------------------------------------------
 void TcpClient::slotConnected() {
@@ -124,6 +137,13 @@ void TcpClient::slotReadyRead() {
 
     mCounterReceiveData++;
     mReadedData.insert(mCounterReceiveData, readData);
+
+    // режим эхо-сервера
+    if (getEchoServer()) {
+        emit signalMsg(QString("echo dg"));
+        sendDataFast(mReadedData[mCounterReceiveData]);
+    }
+
     emit signalReadData(mCounterReceiveData);
 }
 //------------------------------------------------------------------------------

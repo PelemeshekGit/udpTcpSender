@@ -15,4 +15,12 @@ void Ethernet::setTypeClass(const TypeDerivedClass& type) {
     mTypeClass = type;
 }
 
+void Ethernet::setEchoServer(bool on) {
+    mEchoServer = on;
+}
+
+bool Ethernet::getEchoServer() const {
+    return mEchoServer;
+}
+
 }

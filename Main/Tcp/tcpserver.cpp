@@ -14,17 +14,19 @@ TcpServer::TcpServer(QObject* parent) :
 
     mTcp.reset( new QTcpServer(parent) );
 
-    connect( mTcp.data(), SIGNAL(newConnection()),
-             SLOT(slotNewConnection()) );
+    connect( mTcp.data(), SIGNAL(newConnection()), SLOT(slotNewConnection()) );
 }
 //------------------------------------------------------------------------------
 TcpServer::~TcpServer() {
     for (const auto& i : mMyClients.keys()) {
         if (mMyClients[i]->isOpen()) {
+            mMyClients[i]->disconnect(SIGNAL(disconnected()));
+            mMyClients[i]->disconnect(SIGNAL(readyRead()));
             mMyClients[i]->close();
-        } else {
-            mMyClients.remove(i);
         }
+
+        mMyClients[i]->deleteLater();
+        mMyClients.remove(i);
     }
 
     mTcp.data()->close();
@@ -51,7 +53,13 @@ void TcpServer::setSettings(int portManage) {
 }
 //------------------------------------------------------------------------------
 bool TcpServer::sendData(const QByteArray& data) {
-    qintptr descriptor = -1;
+    return sendData(data, -1);
+}
+//------------------------------------------------------------------------------
+bool TcpServer::sendData(const QByteArray& data, const qintptr& descriptor) {
+    if (!isConnected()) {
+        return false;
+    }
 
     bool fResult = false;
 
@@ -81,7 +89,13 @@ bool TcpServer::sendData(const QByteArray& data) {
 }
 //------------------------------------------------------------------------------
 void TcpServer::sendDataFast(const QByteArray& data) {
-    qintptr descriptor = -1;
+    sendDataFast(data, -1);
+}
+//------------------------------------------------------------------------------
+void TcpServer::sendDataFast(const QByteArray& data, const qintptr& descriptor) {
+    if (!isConnected()) {
+        return;
+    }
 
     // если не указан дескриптор, значит отправляем всем
     if (descriptor == -1) {
@@ -118,58 +132,47 @@ void TcpServer::slotNewConnection() {
         }
 
         qintptr idusersocs = clientSock->socketDescriptor();
-        mMyClients.insert(idusersocs,  clientSock);
-        connect( mMyClients[idusersocs], SIGNAL(disconnected()),
-                 SLOT(slotConnectionLost()) );
-        connect( mMyClients[idusersocs], SIGNAL(readyRead()),
-                 SLOT(slotReadClient()));
-//        emit signalConnected( QString::number(idusersocs) );
+
+        mMyClients.insert(idusersocs, clientSock);
+        connect( mMyClients[idusersocs], SIGNAL(disconnected()), SLOT(slotConnectionLost()) );
+        connect( mMyClients[idusersocs], SIGNAL(readyRead()), SLOT(slotReadClient()));
+        emit signalClientConnected( idusersocs );
     }
 }
 //------------------------------------------------------------------------------
 void TcpServer::slotReadClient() {
     // Получение объекта, который вызвал данный слот
-    QTcpSocket* clientSocket = (QTcpSocket*)sender();
-
-    // TODO запись уникального ключа
-    //auto nowDescr = clientSocket->socketDescriptor();
+    QTcpSocket* clientSocket = dynamic_cast<QTcpSocket*>(sender());
 
     mCounterReceiveData++;
     mReadedData.insert(mCounterReceiveData, clientSocket->readAll());
+
+    // режим эхо-сервера
+    if (getEchoServer()) {
+        emit signalMsg(QString("echo dg"));
+        sendDataFast(mReadedData[mCounterReceiveData], clientSocket->socketDescriptor());
+    }
+
     emit signalReadData(mCounterReceiveData);
 }
 //------------------------------------------------------------------------------
 void TcpServer::slotConnectionLost() {
     // Получение объекта, который вызвал данный слот
     QTcpSocket* clientSocket = dynamic_cast<QTcpSocket*>(sender());
-    // нахождение уникального ключа
-    qintptr idusersocs;
-
-    for (const auto& descr : mMyClients.keys()) {
-        if (mMyClients[descr] == clientSocket) {
-            idusersocs = descr;
-        }
-    }
-
-//    emit signalDisconnected( QString::number(idusersocs) );
 
     clientSocket->close();
     clientSocket->deleteLater();
-    // Удалим объект сокета из карты
-    mMyClients.remove(idusersocs);
-    // пересоздание подключения
-//    QHostAddress address;
 
-//    if ( itsIp.isEmpty() ) {
-//        address = QHostAddress::Any;
-//    } else {
-//        address.setAddress( itsIp );
-//    }
-
-//    if ( !mTcp.data()->listen(address, itsPort) ) {
-//        mTcp.data()->close();
-//        emit signalErrorMsg(mTcp.data()->errorString());
-//    }
+    // Удалим объект сокета из карты сети
+    for (auto& obj : mMyClients.values()) {
+        if (obj == clientSocket) {
+            // нахождение уникального ключа (ищем так, потому что дескриптор уже имеет значение -1)
+            qintptr idusersocs = mMyClients.key(obj);
+            mMyClients.remove(idusersocs);
+            emit signalClientDisconnected( idusersocs );
+            break;
+        }
+    }
 }
 //------------------------------------------------------------------------------
 void TcpServer::resetConnect() {

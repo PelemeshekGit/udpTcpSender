@@ -27,11 +27,36 @@ public:
     void setSettings(int portManage) final override;
 
     bool sendData(const QByteArray& data) final override;
+
+    /**
+     * @brief Отправка данных конкретному клиенту с проверкой отправлены ли данные
+     * @param data - данные
+     * @param descriptor - уникальный ключ клиента кому отправляется посылка, -1 - отправка всем
+     * @return - результат отправки (true - отправлено хотя бы одному клиенту, false - не отправлено всем)
+     */
+    bool sendData(const QByteArray& data, const qintptr& descriptor);
+
     void sendDataFast(const QByteArray& data) final override;
+
+    /**
+     * @brief Отправка данных конкретному клиенту данных без проверки. Быстрее чем sendData()
+     * @param data - данные
+     * @param descriptor - уникальный ключ клиента кому отправляется посылка, -1 - отправка всем
+     * @return - результат отправки (true - отправлено, false - не отправлено)
+     */
+    void sendDataFast(const QByteArray& data, const qintptr& descriptor);
 
     QByteArray getData(qint64 id) final override;
 
     bool isConnected() const final override;
+
+//-------------------------------------signals----------------------------------
+signals:
+    /// Присоединился новый клиент
+    void signalClientConnected(qintptr);
+
+    /// Клиент отсоединился
+    void signalClientDisconnected(qintptr);
 
 //----------------------------------private slots------------------------------
 private slots:
@@ -42,14 +67,14 @@ private slots:
     void slotReadClient();
 
     /// Клиент отключился
-    void slotConnectionLost(); // when clien is disconnected
+    void slotConnectionLost();
 
 //-----------------------------------private-----------------------------------
 private:
     void resetConnect();
 
     //------data------//
-    /** @brief Список присоединившихся клиентов
+    /** @brief Список присоединившихся клиентов (карта сети)
      * @param key - номер дискриптора клиента
      * @param value - объект клиента
      * */

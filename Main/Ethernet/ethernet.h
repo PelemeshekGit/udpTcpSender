@@ -58,6 +58,14 @@ public:
      */
     virtual bool isConnected() const = 0;
 
+    /**
+     * @brief Включение режима ответа того что было принято
+     * @param on - true - включить переотправку, false - отключить
+     * @details по умолчанию false
+     */
+    void setEchoServer(bool on);
+    bool getEchoServer() const;
+
     /// возвращает тип производного класса
     TypeDerivedClass getTypeClass() const;
     void setTypeClass(const TypeDerivedClass& type);
@@ -72,8 +80,15 @@ signals:
     /// Сообщение с ошибкой
     void signalErrorMsg(QString);
 
+    /// Сообщение с информацией, отличной от ошибки
+    void signalMsg(QString);
+
 protected:
     TypeDerivedClass mTypeClass = TypeDerivedClass::Undefined;
+
+private:
+    bool mEchoServer = false;
+
 };
 
 }

@@ -53,7 +53,7 @@ void Udp::sendDataFast(const QByteArray& data) {
         return;
     }
 
-    mUdp.data()->writeDatagram(data,
+    mUdp.data()->writeDatagram(std::move(data),
                                mAddressSender,
                                mPortSender);
 }
@@ -85,7 +85,14 @@ void Udp::slotReadData() {
     }
 
     mCounterReceiveData++;
-    mReadedData.insert(mCounterReceiveData, readData);
+    mReadedData.insert(mCounterReceiveData, std::move(readData) );
+
+    // режим эхо-сервера
+    if (getEchoServer()) {
+        emit signalMsg(QString("echo dg"));
+        sendDataFast(mReadedData[mCounterReceiveData]);
+    }
+
     emit signalReadData(mCounterReceiveData);
 }
 //------------------------------------------------------------------------------
