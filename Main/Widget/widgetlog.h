@@ -36,6 +36,9 @@ private:
     /// Запись текущего времени в лог
     void writeCurrentTimeToLog();
 
+    /// Переход в конец строки
+    void moveToEnd();
+
 private slots:
     void slotClearLog();
 };

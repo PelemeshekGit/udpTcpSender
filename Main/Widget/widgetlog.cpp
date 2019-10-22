@@ -42,11 +42,18 @@ void WidgetLog::writeLog(const QByteArray& dg) {
     }
 
     writeSeparatorToLog();
+    moveToEnd();
 }
 //------------------------------------------------------------------------------
 void WidgetLog::writeInfo(const QString& text) {
+    // запрет записи в лог
+    if (!ui->checkEnableLog->isChecked()) {
+        return;
+    }
+
     writeCurrentTimeToLog();
     ui->textLog->insertPlainText( text + "\n" );
+    moveToEnd();
 }
 //------------------------------------------------------------------------------
 void WidgetLog::slotWriteInfo(QString text) {
@@ -66,4 +73,7 @@ void WidgetLog::writeCurrentTimeToLog() {
                                   .arg(QTime::currentTime().toString("HH:mm:ss:zzz")) );
 }
 //------------------------------------------------------------------------------
-
+void WidgetLog::moveToEnd(){
+    ui->textLog->moveCursor(QTextCursor::End);
+}
+//------------------------------------------------------------------------------
